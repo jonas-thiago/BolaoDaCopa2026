@@ -143,7 +143,7 @@ def main():
                     g_name = group_list[i + j]
                     teams = GROUPS[g_name]
                     with cols[j].container(border=True):
-                        st.markdown(f"#### {group_name}")
+                        st.markdown(f"#### {g_name}")
                         f = st.selectbox("1º Colocado", teams, key=f"f_{g_name}", index=None, placeholder="Selecione...")
                         rem_s = [t for t in teams if t != f] if f else teams
                         s = st.selectbox("2º Colocado", rem_s, key=f"s_{g_name}", index=None, placeholder="Selecione...")
