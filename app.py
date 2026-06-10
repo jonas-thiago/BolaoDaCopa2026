@@ -84,13 +84,14 @@ def shuffle_thirds():
     
     if len(candidates) >= 8:
         st.session_state.best_thirds = random.sample(candidates, 8)
+        # Sincroniza o valor do widget diretamente no session_state usando a chave
+        st.session_state.thirds_selector = st.session_state.best_thirds
     else:
         st.session_state.warning_msg = "Selecione os 1º e 2º de todos os grupos antes de sortear."
 
 def render_match(label, t1, t2, k):
     with st.container(border=True):
         st.markdown(f"**{label}**")
-        # index=None deixa em branco inicialmente sem opção 'None' explícita
         return st.radio("Vence:", [t1, t2], key=k, horizontal=True, index=None)
 
 def main():
@@ -142,7 +143,7 @@ def main():
                     g_name = group_list[i + j]
                     teams = GROUPS[g_name]
                     with cols[j].container(border=True):
-                        st.markdown(f"#### {g_name}")
+                        st.markdown(f"#### {group_name}")
                         f = st.selectbox("1º Colocado", teams, key=f"f_{g_name}", index=None, placeholder="Selecione...")
                         rem_s = [t for t in teams if t != f] if f else teams
                         s = st.selectbox("2º Colocado", rem_s, key=f"s_{g_name}", index=None, placeholder="Selecione...")
@@ -165,17 +166,17 @@ def main():
         
         candidate_names = [c["team"] for c in candidates]
         
-        # Corrigindo o botão aleatório: ele deve resetar o multiselect via key se necessário, 
-        # mas aqui o state já cuida da re-renderização.
+        # O botão agora força a atualização do thirds_selector no session_state
         st.button("🎲 Sortear 8 Aleatórios", type="secondary", on_click=shuffle_thirds)
 
         selected_thirds = st.multiselect(
             "Selecione exatamente 8 times:",
             options=candidate_names,
-            default=[t for t in st.session_state.best_thirds if t in candidate_names],
             max_selections=8,
-            key="thirds_selector"
+            key="thirds_selector",
+            placeholder="Escolha os times..."
         )
+        # Atualiza o best_thirds com o valor atual do widget
         st.session_state.best_thirds = selected_thirds
 
         if st.button("Avançar para o Mata-Mata", type="primary", use_container_width=True):
@@ -213,7 +214,6 @@ def main():
             with (c1 if i < 16 else c2):
                 r32_w.append(render_match(f"Jogo {i//2 + 1}", teams[i], teams[i+1], f"r32_{i}"))
         
-        # Só libera a próxima fase se todos os jogos da atual tiverem um vencedor (não None)
         if all(r32_w):
             st.divider()
             # --- R16 (Round of 16) ---
