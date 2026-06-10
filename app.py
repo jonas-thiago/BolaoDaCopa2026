@@ -90,7 +90,8 @@ def shuffle_thirds():
 def render_match(label, t1, t2, k):
     with st.container(border=True):
         st.markdown(f"**{label}**")
-        return st.radio("Vence:", [None, t1, t2], key=k, horizontal=True)
+        # index=None deixa em branco inicialmente sem opção 'None' explícita
+        return st.radio("Vence:", [t1, t2], key=k, horizontal=True, index=None)
 
 def main():
     st.markdown("# 🏆 Simulador da Copa do Mundo 2026")
@@ -142,9 +143,9 @@ def main():
                     teams = GROUPS[g_name]
                     with cols[j].container(border=True):
                         st.markdown(f"#### {g_name}")
-                        f = st.selectbox("1º Colocado", [None] + teams, key=f"f_{g_name}")
+                        f = st.selectbox("1º Colocado", teams, key=f"f_{g_name}", index=None, placeholder="Selecione...")
                         rem_s = [t for t in teams if t != f] if f else teams
-                        s = st.selectbox("2º Colocado", [None] + rem_s, key=f"s_{g_name}")
+                        s = st.selectbox("2º Colocado", rem_s, key=f"s_{g_name}", index=None, placeholder="Selecione...")
                         
                         st.session_state.selections[g_name]["first"] = f
                         st.session_state.selections[g_name]["second"] = s
@@ -164,6 +165,8 @@ def main():
         
         candidate_names = [c["team"] for c in candidates]
         
+        # Corrigindo o botão aleatório: ele deve resetar o multiselect via key se necessário, 
+        # mas aqui o state já cuida da re-renderização.
         st.button("🎲 Sortear 8 Aleatórios", type="secondary", on_click=shuffle_thirds)
 
         selected_thirds = st.multiselect(
